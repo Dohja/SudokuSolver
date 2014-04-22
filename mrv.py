@@ -57,8 +57,13 @@ def findMRV(board, PVB):
                 MRV = len(PVB[i][j])
     return [MRVPos, MRV_list]
 
+
 def MRVSearch(board):
     global PVB
+    global numCheck
+    numCheck += 1
+    if numCheck % 1000 == 0:
+        print numCheck
     if iscomplete(board.CurrentGameboard):
         print "Yes, you did it!"
         return board # this prints the board
@@ -82,20 +87,31 @@ def MRVSearch(board):
         else: return False
 
 # board_1 = SudokuBoard(4 ,parse_file("c:/Users/crazydonkey200/Documents/GitHub/SudokuSolver/Puzzles/4_4.sudoku"))
+numCheck = 0
+PVB = []
+def tryMRVSearch(size, filename):
+    print size, filename
+    global numCheck
+    global PVB
+    numCheck = 0
+    board_1 = SudokuBoard(size ,parse_file(filename))
+    PVB = updatePVB(board_1)
+    print board_1.CurrentGameboard
+    PVB = updatePVB(board_1)
+    solution = MRVSearch(board_1)
+    if solution != False:
+        print solution.CurrentGameboard
+    else: print "Shit!"
 
-board_1 = SudokuBoard(9 ,parse_file("c:/Users/crazydonkey200/Documents/GitHub/SudokuSolver/Puzzles/9x9.3.sudoku"))
-
-print board_1.CurrentGameboard
-
-PVB = updatePVB(board_1)
-
-solution = MRVSearch(board_1)
-
-if solution != False:
-    print solution.CurrentGameboard
-else: print "Shit!"
-
-solution_backtrack = backTrack(board_1)
-if solution_backtrack != False:
-    print solution_backtrack.CurrentGameboard
-else: print "Shit!"
+##for i in range(1,21):
+##    tryMRVSearch(9, "c:/Users/crazydonkey200/Documents/GitHub/SudokuSolver/Puzzles/9x9." + str(i) + ".sudoku")
+##
+##
+##for i in range(1,21):
+##    tryMRVSearch(16, "c:/Users/crazydonkey200/Documents/GitHub/SudokuSolver/Puzzles/16x16." + str(i) + ".sudoku")
+##
+##
+#solution_backtrack = backTrack(board_1)
+#if solution_backtrack != False:
+#    print solution_backtrack.CurrentGameboard
+#else: print "Shit!"
