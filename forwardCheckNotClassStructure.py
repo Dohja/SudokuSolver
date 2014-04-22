@@ -8,11 +8,11 @@ count = 0
 
 def forwardCheckSolve(board):
     global count
+    if count%1000 == 0: print count
     possibleValues = findPossibleValues(board)
     for i in range(board.BoardSize):
         for j in range(board.BoardSize):
             if possibleValues[i][j]==[] and board.CurrentGameboard[i][j]==0:
-                count = 0
                 return False
     for i in range(board.BoardSize):
         for j in range(board.BoardSize):
@@ -20,13 +20,16 @@ def forwardCheckSolve(board):
                 count += 1
                 nextState = board.set_value(i,j,k)
                 solution = forwardCheckSolve(nextState)
-                if solution: return solution
+                if solution:
+                    return solution
                 else: board.set_value(i, j, 0)
+            if board.CurrentGameboard[i][j] == 0: return False
     if iscomplete(board.CurrentGameboard):
-        print "this took us " + str(count) + " consistency checks"
+        print "we made " + str(count) + " consistency checks"
         count = 0
         return board
-    else: return False
+    else:
+        return False
 
 def getQuadrant(board, row, col):
     square = int(math.sqrt(board.BoardSize))
