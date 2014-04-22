@@ -4,6 +4,24 @@ import time
 import random
 import sudoku
 
+def forwardCheckSolve(board):
+    possibleValues = findPossibleValues(board)
+    print possibleValues
+    for i in range(board.BoardSize):
+        for j in range(board.BoardSize):
+            if possibleValues[i][j]==[] and board.CurrentGameboard[i][j]==0:
+                return False
+    for i in range(board.BoardSize):
+        for j in range(board.BoardSize):
+            for k in possibleValues[i][j]:
+                nextState = board.set_value(i,j,k)
+                solution = forwardCheckSolve(nextState)
+                if solution: return solution
+                else: board.set_value(i, j, 0)
+    if board.CurrentGameboard.iscomplete():
+        return board
+    else: return False
+
 def getQuadrant(board, row, col):
     square = int(math.sqrt(board.BoardSize))
     sq_row = (row // square)
@@ -28,142 +46,69 @@ def isLegalMove(board, row, col, val):
                 return False
     return True
 
+def findPossibleValues(board):
+    possibleValues = []
+    for row in range(board.BoardSize):
+        possibleValues.append([])
+        for col in range(board.BoardSize):
+            possibleValues[row].append([])
+            for i in range(1, board.BoardSize+1):
+                if isLegalMove(board, row, col, i):
+                    possibleValues[row][col].append(i)
+                    
 class SudokuBoard:
-	def __init__(self, size, board):
-		self.BoardSize = size #the size of the board
-		self.CurrentGameboard = board #the current state of the game board
-		self.possibleValues = []
-		for row in range(size):
-			self.possibleValues.append([])
-			for col in range(size):
-				self.possibleValues[row].append([])
-				for i in range(size):
-		 			if isLegalMove(self, row, col, i): 
-		 				self.possibleValues[row][col].append(i)
-		# 		if self.CurrentGameboard[row][col]==0:
-		# 			self.possibleValues[row].append(range(1,size+1))
-		# 		else:
-		# 			self.possibleValues[row].append([])
 
-		# for row in range(self.BoardSize):
-		# 	for col in range(self.BoardSize):
-		# 		if self.CurrentGameboard[row][col] != 0:
-		# 			value = self.CurrentGameboard[row][col]
-		# 			for k in range(self.BoardSize):
-		# 				try :
-		# 					self.possibleValues[row][k].remove(value)
-		# 				except ValueError:
-		# 					pass
-		# 				try :
-		# 					self.possibleValues[k][col].remove(value)
-		# 				except ValueError:
-		# 					pass
-		# 			for i,j in self.getQuadrant(row,col):
-		# 				try :
-		# 					self.possibleValues[i][j].remove(value)
-		# 				except ValueError:
-		# 					pass
+    #the constructor for the SudokuBoard
+    def __init__(self, size, board):
+      self.BoardSize = size #the size of the board
+      self.CurrentGameboard= board #the current state of the game board
 
-	def __repr__(self):
-	    square = int(math.sqrt(self.BoardSize))
-	    mainString = ""
-	    padding = 3
-	    for i in range(self.BoardSize):
-	        if (i%square) == 0:
-	            mainString = mainString + "\n" + ("-".center(padding)*(self.BoardSize+square-1))
+    #This function will create a new sudoku board object with
+    #with the input value placed on the GameBoard row and col are
+    #both zero-indexed
+    def __repr__(self):
+        square = int(math.sqrt(self.BoardSize))
+        mainString = ""
+        padding = 3
+        for i in range(self.BoardSize):
+            if (i%square) == 0:
+                mainString = mainString + "\n" + ("-".center(padding)*(self.BoardSize+square-1))
 
-	        string = str(self.CurrentGameboard[i][0]).center(padding)
-	        for j in range(1,self.BoardSize):
-	            if ((j%square)) == 0:
-	                string = string + "|".center(padding)
-	            string = string + str(self.CurrentGameboard[i][j]).center(padding)
-	        mainString = mainString + "\n" + string
-	    mainString = "\n" + mainString + "\n" + ("-".center(padding)*(self.BoardSize+square-1))
-	    return mainString
+            string = str(self.CurrentGameboard[i][0]).center(padding)
+            for j in range(1,self.BoardSize):
+                if ((j%square)) == 0:
+                    string = string + "|".center(padding)
+                string = string + str(self.CurrentGameboard[i][j]).center(padding)
+            mainString = mainString + "\n" + string
+        mainString = "\n" + mainString + "\n" + ("-".center(padding)*(self.BoardSize+square-1))
+        return mainString
+    
+    def __str__(self):
+        square = int(math.sqrt(self.BoardSize))
+        mainString = ""
+        padding = 3
+        for i in range(self.BoardSize):
+            if (i%square) == 0:
+                mainString = mainString + "\n" + ("-".center(padding)*(self.BoardSize+square-1))
+            string = str(self.CurrentGameboard[i][0]).center(padding)
+            for j in range(1,self.BoardSize):
+                if ((j%square)) == 0:
+                    string = string + "|".center(padding)
+                string = string + str(self.CurrentGameboard[i][j]).center(padding)
+            mainString = mainString + "\n" + string
+        mainString = "\n" + mainString + "\n" + ("-".center(padding)*(self.BoardSize+square-1))
+        return mainString
+    
+    def set_value(self, row, col, value):
+        self.CurrentGameboard[row][col]=value #add the value to the appropriate position on the board
+        return SudokuBoard(self.BoardSize, self.CurrentGameboard) #return a new board of the same size with the value added
+    
 
-	def __str__(self):
-	    square = int(math.sqrt(self.BoardSize))
-	    mainString = ""
-	    padding = 3
-	    for i in range(self.BoardSize):
-	        if (i%square) == 0:
-	            mainString = mainString + "\n" + ("-".center(padding)*(self.BoardSize+square-1))
-	        string = str(self.CurrentGameboard[i][0]).center(padding)
-	        for j in range(1,self.BoardSize):
-	            if ((j%square)) == 0:
-	                string = string + "|".center(padding)
-	            string = string + str(self.CurrentGameboard[i][j]).center(padding)
-	        mainString = mainString + "\n" + string
-	    mainString = "\n" + mainString + "\n" + ("-".center(padding)*(self.BoardSize+square-1))
-	    return mainString
 
-	def iscomplete(self):
-	    size = self.BoardSize
-	    subsquare = int(math.sqrt(size))
-	    #check each cell on the board for a 0, or if the value of the cell
-	    #is present elsewhere within the same row, column, or square
-	    for row in range(size):
-	        for col in range(size):
-	            if self.CurrentGameboard[row][col]==0:
-	                return False
-	            for i in range(size):
-	                if ((self.CurrentGameboard[row][i] == self.CurrentGameboard[row][col]) and i != col):
-	                    return False
-	                if ((self.CurrentGameboard[i][col] == self.CurrentGameboard[row][col]) and i != row):
-	                    return False
-	            #determine which square the cell is in
-	            SquareRow = row // subsquare
-	            SquareCol = col // subsquare
-	            for i in range(subsquare):
-	                for j in range(subsquare):
-	                    if((self.CurrentGameboard[SquareRow*subsquare + i][SquareCol*subsquare + j] == self.CurrentGameboard[row][col])
-	                       and (SquareRow*subsquare + i != row) and (SquareCol*subsquare + j != col)):
-	                        return False
-	    return True
-
-	def getQuadrant(self, row, col, size=None):
-		if size:
-			square = size
-		else:
-			square = int(math.sqrt(self.BoardSize))
-		sq_row = (row // square)
-		sq_col = (col // square)
-		quadrant = []
-		for i in range(square):
-			for j in range(square):
-				quadrant.append((square * sq_row + i,square * sq_col +j))
-		return quadrant
-
-	def set_value(self, row, col, value):
-		self.CurrentGameboard[row][col]=value #add the value to the appropriate position on the board
-		return SudokuBoard(self.BoardSize, self.CurrentGameboard) #return a new board of the same size with the value added
-
-	def emptyPossibleValues(self):
-		for i in range(self.BoardSize):
-			for j in range(self.BoardSize):
-				if self.possibleValues[i][j] != []:
-					return False
-		return True
-
-	def forwardCheckSolve(self):
-		for i in range(self.BoardSize):
-			for j in range(self.BoardSize):
-				if self.possibleValues[i][j]==[] and self.CurrentGameboard[i][j]==0:
-					return False
-		for i in range(self.BoardSize):
-			for j in range(self.BoardSize):
-				for k in range(0,len(self.possibleValues[i][j])):
-					nextMove = self.possibleValues[i][j][k]
-					nextState = self.set_value(i,j,nextMove)
-					solution = nextState.forwardCheckSolve()
-					if solution:
-						return solution
-					else: self.set_value(i, j, 0)
-
-		if self.iscomplete():
-			return self
-		else:
-			return False
+# parse_file
+#this function will parse a sudoku text file (like those posted on the website)
+#into a BoardSize, and a 2d array [row,col] which holds the value of each cell.
+# array elements witha value of 0 are considered to be empty
 
 def parse_file(filename):
     f = open(filename, 'r')
@@ -181,19 +126,66 @@ def parse_file(filename):
         col = int(chars[1])
         val = int(chars[2])
         board[row-1][col-1]=val
+    
     return board
 
+
+#takes in an array representing a sudoku board and tests to
+#see if it has been filled in correctly
+def iscomplete( BoardArray ):
+    size = len(BoardArray)
+    subsquare = int(math.sqrt(size))
+    #check each cell on the board for a 0, or if the value of the cell
+    #is present elsewhere within the same row, column, or square
+    for row in range(size):
+        for col in range(size):
+            if BoardArray[row][col]==0:
+                return False
+            for i in range(size):
+                if ((BoardArray[row][i] == BoardArray[row][col]) and i != col):
+                    return False
+                if ((BoardArray[i][col] == BoardArray[row][col]) and i != row):
+                    return False
+            #determine which square the cell is in
+            SquareRow = row // subsquare
+            SquareCol = col // subsquare
+            for i in range(subsquare):
+                for j in range(subsquare):
+                    if((BoardArray[SquareRow*subsquare + i][SquareCol*subsquare + j] == BoardArray[row][col])
+                       and (SquareRow*subsquare + i != row) and (SquareCol*subsquare + j != col)):
+                        return False
+    return True
+
+# creates a SudokuBoard object initialized with values from a text file like those found on the course website
 def init_board( file_name ):
     board = parse_file(file_name)
     return SudokuBoard(len(board), board)
 
-if __name__ == "__main__" :
-	global count
-	count = 0
-	board = init_board('./Puzzles/4_4.sudoku')
-	print board
-	print board.forwardCheckSolve()
 
+########## NEW CODE
 
+def isLegalMove(board, row, col, val):
+    if board.CurrentGameboard[row][col] != 0: 
+        return False
+    else:
+        for i in range(board.BoardSize):
+            if (board.CurrentGameboard[row][i] == val or board.CurrentGameboard[i][col] == val): 
+                return False
+        for square in getQuadrant(board, row, col):
+            r = square[0]
+            c = square[1]
+            if board.CurrentGameboard[r][c] == val: 
+                return False
+    return True
+
+def getQuadrant(board, row, col):
+    square = int(math.sqrt(board.BoardSize))
+    sq_row = (row // square)
+    sq_col = (col // square)
+    quadrant = []
+    for i in range(square):
+        for j in range(square):
+            quadrant.append((square * sq_row + i,square * sq_col +j))
+    return quadrant
 
          
